@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우정약품 AI 업무 시스템</title>
+<style>
+:root{--fg:#1d1d1f;--muted:#6e6e73;--line:#e5e5ea;--bg:#ffffff;--soft:#f5f5f7;--accent:#2f7d1f;--accent2:#6aa32a;
+  --f:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--f);color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;word-break:keep-all}
+img,video,iframe{max-width:100%;display:block}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+section{padding:110px 0}
+.soft{background:var(--soft)}
+.eyebrow{font-size:15px;font-weight:700;color:var(--accent);letter-spacing:.02em;margin:0 0 14px}
+h1{font-size:clamp(36px,6.2vw,76px);line-height:1.08;letter-spacing:-.025em;margin:0 0 22px;font-weight:800}
+h2{font-size:clamp(30px,4.6vw,56px);line-height:1.12;letter-spacing:-.02em;margin:0 0 18px;font-weight:800}
+h3{font-size:clamp(20px,2.2vw,26px);margin:0 0 8px}
+.lead{font-size:clamp(18px,2.1vw,25px);line-height:1.6;color:var(--muted);margin:0;font-weight:500}
+.lead b{color:var(--fg)}
+.center{text-align:center}
+.grad{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* 나타나기 */
+.rv{opacity:0;transform:translateY(36px);transition:opacity .9s ease,transform .9s ease}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
+
+/* 첫 화면 */
+.hero{min-height:100vh;display:flex;align-items:center;padding:80px 0}
+.hero .by{margin-top:34px;font-size:16px;color:var(--muted)}
+.hero .by b{color:var(--fg)}
+.scrollhint{margin-top:60px;font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:center}
+.scrollhint i{width:22px;height:34px;border:2px solid #c7c7cc;border-radius:12px;position:relative}
+.scrollhint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;margin-left:-2px;background:#c7c7cc;border-radius:2px;animation:dot 1.6s infinite}
+@keyframes dot{0%{opacity:0;transform:translateY(0)}40%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+
+/* 3가지 */
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:46px}
+.tile{background:#fff;border-radius:22px;padding:30px 28px;box-shadow:0 1px 0 var(--line),0 18px 40px rgba(0,0,0,.05)}
+.tile .n{font-size:44px;font-weight:800;color:var(--accent2);line-height:1}
+.tile p{color:var(--muted);line-height:1.6;margin:8px 0 0}
+.why{display:grid;gap:12px;margin-top:40px}
+.why div{font-size:clamp(20px,2.4vw,30px);font-weight:700;letter-spacing:-.01em}
+.why span{color:var(--muted);font-weight:500}
+
+/* 시연 구간 */
+.demo .head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:26px;align-items:start;margin-bottom:34px}
+.demo .num{font-size:clamp(64px,9vw,120px);font-weight:800;line-height:.9;color:#d6e8c6;letter-spacing:-.04em}
+.demo .dept{display:inline-block;font-size:14px;font-weight:700;color:var(--accent);background:#eef6e6;border-radius:20px;padding:4px 12px;margin-bottom:12px}
+.demo .ba{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:22px}
+.demo .ba div{border-radius:16px;padding:16px 18px;font-size:17px;line-height:1.55}
+.demo .ba .b{background:#f5f5f7;color:#48484a}
+.demo .ba .a{background:#eef6e6;color:#1f4f12}
+.demo .ba small{display:block;font-size:13px;font-weight:800;margin-bottom:4px;opacity:.75}
+.screen{border-radius:22px;overflow:hidden;background:#0d0d0f;box-shadow:0 30px 60px rgba(0,0,0,.18);position:relative;aspect-ratio:16/9}
+.screen video,.screen iframe{width:100%;height:100%;border:0;object-fit:contain}
+.check{margin-top:16px;font-size:15px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.ytlink{margin-left:auto;color:var(--accent);font-weight:700;text-decoration:none;white-space:nowrap}
+.thumb{position:absolute;inset:0;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;opacity:.92}
+.thumb .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:86px;height:60px;border-radius:16px;background:#ff0033;color:#fff;font-size:28px;display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.thumb .cap{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;border-radius:20px;padding:6px 14px;font-weight:700;font-size:14px}
+.check::before{content:"✓";display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent2);color:#fff;font-size:13px;font-weight:800}
+
+/* 포털 */
+.portal{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:40px}
+.portal img{border-radius:18px;box-shadow:0 24px 50px rgba(0,0,0,.14)}
+/* 된 것 / 연결 */
+.twocol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;margin-top:40px}
+.twocol .box{border-radius:22px;padding:30px}
+.twocol .done{background:#eef6e6}
+.twocol .next{background:#fff;border:1px solid var(--line)}
+.twocol h3{margin-bottom:14px}
+.twocol li{margin:9px 0;line-height:1.5;font-size:17px}
+.twocol ul{padding-left:20px;margin:0}
+/* 이제부터 */
+.start{background:linear-gradient(180deg,#fff,#f3f8ee)}
+.start .lines p{font-size:clamp(20px,2.5vw,30px);line-height:1.55;margin:0 0 18px;font-weight:600;letter-spacing:-.01em;color:#3a3a3c}
+.start .lines p b{color:var(--fg)}
+.cycle{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
+.cycle span{background:#fff;border:1px solid var(--line);border-radius:30px;padding:10px 18px;font-weight:700}
+.cycle i{font-style:normal;color:var(--accent2);font-weight:800;align-self:center}
+/* 마지막 */
+.final{min-height:90vh;display:flex;align-items:center}
+.final h2{font-size:clamp(28px,4.2vw,52px);line-height:1.3}
+.final .human{display:block;margin-top:18px}
+
+/* 진행 점 */
+.dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:9px;z-index:10}
+.dots a{width:9px;height:9px;border-radius:50%;background:#d1d1d6;display:block;transition:.2s;position:relative}
+.dots a.on{background:var(--accent2);height:24px;border-radius:6px}
+.dots a span{position:absolute;right:20px;transform:translateY(-4px);font-size:12px;color:var(--muted);white-space:nowrap;opacity:0;transition:.2s;pointer-events:none}
+.dots a:hover span{opacity:1}
+@media (max-width:760px){
+  section{padding:76px 0}
+  .three,.portal,.twocol,.demo .ba{grid-template-columns:1fr}
+  .demo .head{grid-template-columns:1fr;gap:4px}
+  .demo .num{font-size:64px}
+  .dots{display:none}
+  .wrap{padding:0 18px}
+}
+</style>
+</head>
+<body>
+<nav class="dots" id="dots"></nav>
+
+<section class="hero" id="top">
+  <div class="wrap">
+    <p class="eyebrow rv">우정약품 AI 업무 시스템</p>
+    <h1 class="rv d1">실무자의 노하우를 담은,<br><span class="grad">우정약품 맞춤 AI 업무 시스템</span></h1>
+    <p class="lead rv d2">입고부터 출고 · 배송 · 반품 · 기초데이터 · 홈페이지 · 안전보건까지.<br>현장에서 매일 하는 일을, 실수 없이 더 빠르게.</p>
+    <p class="by rv d3">작성자: <b>김성진</b></p>
+    <div class="scrollhint rv d3"><i></i>아래로 내려 보세요</div>
+  </div>
+</section>
+
+<section class="soft" id="why">
+  <div class="wrap">
+    <p class="eyebrow rv">왜 필요한가</p>
+    <h2 class="rv d1">지금은 사람이<br>모두 기억하고, 대조하고, 부탁합니다.</h2>
+    <div class="why">
+      <div class="rv d1">명세서와 펜으로 <span>한 줄씩 대조하고,</span></div>
+      <div class="rv d2">진행 상황은 <span>직접 돌아다니며 확인하고,</span></div>
+      <div class="rv d3">홈페이지 한 줄도 <span>업체에 맡겨 고칩니다.</span></div>
+    </div>
+    <p class="lead rv" style="margin-top:34px">그래서 <b>실수 · 시간 · 비용</b>이 생깁니다.</p>
+    <div class="three">
+      <div class="tile rv"><div class="n">0 / 1</div><h3>확인해야 넘어간다</h3><p>확인하지 않으면 다음 단계로 넘어가지 않습니다. 빠뜨림이 구조적으로 막힙니다.</p></div>
+      <div class="tile rv d1"><div class="n">⇄</div><h3>문서와 실물을 대조</h3><p>명세서 · 지시서와 실제 스캔을 맞춰 보고, 다른 곳만 바로 보여줍니다.</p></div>
+      <div class="tile rv d2"><div class="n">📱</div><h3>현장에서 바로</h3><p>휴대폰 · 태블릿에서 크게, 쉽게. 부서마다 필요한 화면만.</p></div>
+    </div>
+  </div>
+</section>
+
+<div id="demos"></div>
+
+<section class="soft" id="portal">
+  <div class="wrap">
+    <p class="eyebrow rv">하나의 시스템</p>
+    <h2 class="rv d1">로그인 한 번으로,<br>부서마다 필요한 메뉴만.</h2>
+    <p class="lead rv d2">일곱 가지 프로그램이 하나로 묶여 있습니다. 관리자는 전체를, 직원은 권한을 받은 메뉴만 봅니다.</p>
+    <div class="portal">
+      <img class="rv" src="img/portal_login.png" alt="통합 로그인 화면">
+      <img class="rv d1" src="img/portal_home.png" alt="권한별 메뉴 화면">
+    </div>
+  </div>
+</section>
+
+<section id="ready">
+  <div class="wrap">
+    <p class="eyebrow rv">지금 된 것 · 도입하면 연결할 것</p>
+    <h2 class="rv d1">다시 만드는 것이 아니라,<br>연결하는 것입니다.</h2>
+    <div class="twocol">
+      <div class="box done rv"><h3>지금 된 것</h3><ul>
+        <li>일곱 가지 프로그램의 화면 · 기능</li>
+        <li>현장 판단 규칙 (입고 대조 · 반품 판별 · 코드 점검 …)</li>
+        <li>가상 자료로 검증 (일부러 심어 둔 오류를 모두 찾는지)</li>
+        <li>통합 로그인 · 부서별 권한</li></ul></div>
+      <div class="box next rv d1"><h3>도입하면 연결할 것</h3><ul>
+        <li>신성 ERP 자료 읽어 오기 (읽기 전용)</li>
+        <li>사내 서버 · 데이터베이스 (모든 PC · 태블릿이 같은 자료)</li>
+        <li>직원별 계정 · 접속 기록</li>
+        <li>AI 연결 (Claude) · 2D 스캐너 · 태블릿</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="start" id="start">
+  <div class="wrap">
+    <p class="eyebrow rv">앞으로가 중요합니다</p>
+    <h2 class="rv d1">이제부터가 시작입니다.</h2>
+    <div class="lines">
+      <p class="rv">화면과 기능은 이렇게 만들어졌습니다.<br>하지만 화면만으로는 <b>누구나 비슷하게</b> 만들 수 있습니다.</p>
+      <p class="rv d1">우정약품만의 AI 엔진이 되는 것은,<br><b>현장 실무자가 매일 쓰면서 겪는 예외와 노하우를 규칙으로 쌓아 갈 때</b>입니다.</p>
+      <p class="rv d2"><b>쓰는 만큼 다듬어지고, 다듬은 만큼 실수가 줄어듭니다.</b></p>
+    </div>
+    <div class="cycle rv d2"><span>현장에서 사용</span><i>→</i><span>예외 · 노하우 기록</span><i>→</i><span>규칙 다듬기</span><i>→</i><span>정답지로 검증</span><i>↻</i></div>
+  </div>
+</section>
+
+<section class="final" id="final">
+  <div class="wrap center">
+    <h2 class="rv">가상의 AI 직원이 실무자의 일을 도와<br>24시간 회사 자료를 분석합니다.<span class="human grad rv d2">하지만 결정은 언제나 사람이 합니다.</span></h2>
+  </div>
+</section>
+
+<script>
+// 영상: 유튜브 '일부 공개' 링크를 yt에 넣으면 유튜브로, 비어 있으면 영상 폴더의 파일로 재생한다.
+var DEMOS = [
+  { n: "1", dept: "경영지원 · 전산", title: "홈페이지를 직접 고칩니다", lead: "같은 메뉴 · 같은 사진으로 깔끔하게, 휴대폰에서도. 관리자 모드에서 사진 · 메뉴 · 칸 · 팝업 · 배송 안내를 바로 바꿉니다.",
+    before: "고칠 때마다 업체에 요청 · 휴대폰에서도 PC 화면 그대로", after: "직원이 직접 · 즉시 수정, 계절 효과, 약국 Q&A는 전산실로 바로", check: "가상 자료로 검증: 메뉴 추가 · 사진 교체 · 팝업 기간 · Q&A 전송 등 12개 점검 통과", file: "영상/01_홈페이지.mp4", yt: "https://youtu.be/eXHzO6LfV-s" },
+  { n: "2", dept: "입고 · 구매", title: "입고 검수, 펜 대신 스캔", lead: "명세서 · 발주 · 실물 스캔을 한 번에 대조합니다. 다른 곳이 남아 있으면 입고 확정이 되지 않습니다.",
+    before: "명세서와 펜으로 한 줄씩 대조", after: "2D 스캔 → 수량 · LOT · 유효기한 · 냉장 · 일련번호 자동 대조", check: "가상 자료로 검증: 일부러 심어 둔 입고 오류 19건을 모두 찾아냄", file: "영상/02_입고검수.mp4", yt: "https://youtu.be/j6rjVCxKPSE" },
+  { n: "3", dept: "출고", title: "출고 진행이 한눈에", lead: "차수별로 주문 · 출력 · 피킹 · 검수 · 포장이 어디까지 왔는지 보여 주고, 늦어질 차량을 미리 알려 줍니다. 궁금한 건 AI 채팅으로.",
+    before: "직접 돌아다니며 진행 상황 확인", after: "현황판 · 지연 경고 · 누락 대조 · 업무 AI 채팅", check: "가상 자료로 검증: 출력 누락 · 피킹 누락 · 지연 등 54건을 모두 찾아냄", file: "영상/03_출고현황판.mp4", yt: "https://youtu.be/X8wzpYEYbGI" },
+  { n: "4", dept: "배송", title: "실제 도로 기준, 가장 빠른 순서", lead: "코스별 약국을 실제 도로 기준으로 다시 배열하고, 도착 예정 시간을 보여 줍니다. 관리자는 순서를 바꿔 보며 비교합니다.",
+    before: "기사 경험으로 정한 순서", after: "지도 위 최적 순서 · 도착 예정 · 주거래처 우선 비교", check: "가상 자료로 검증: 4개 코스 27.0km · 마지막 납품 75분 단축", file: "영상/04_배송지도.mp4", yt: "https://youtu.be/IStyeuKTIsA" },
+  { n: "5", dept: "반품", title: "우리가 판 약인지 먼저 확인", lead: "반품을 찍으면 판매 기록과 대조해 우리 판매인지 알려 주고, 확인된 것만 반품실에 들어갑니다. 제약사 반품은 조건을 미리 점검합니다.",
+    before: "확인 없이 회수 → 타사 약이 악성재고로", after: "판매 기록 대조 · 타 도매상 안내서 · 제약사 반품 조건 점검", check: "가상 자료로 검증: 반품 판정 30건 · 제약사 조건 미충족 5건 모두 맞힘", file: "영상/05_반품판별.mp4", yt: "https://youtu.be/MhjCBX1cRhk" },
+  { n: "6", dept: "구매 · 기초데이터", title: "AI 구매팀장이 코드를 지킵니다", lead: "제품 코드 · 표준코드 · 제품명의 잘못된 점을 반기마다 모두 찾고, 새 코드는 만들 때 바로 검사합니다. 실무는 사람이, 확인은 AI가.",
+    before: "만든 사람마다 다른 표기 · 구코드에 묶인 재고", after: "위험 순 점검 목록 · AI 수정안 일괄 승인 · 신규 코드 차단", check: "가상 자료로 검증: 1,200코드에 심어 둔 오류 392건을 모두 찾아냄", file: "영상/06_기초데이터점검.mp4", yt: "https://youtu.be/uxByl-h677s" },
+  { n: "7", dept: "경영지원 · 안전보건", title: "법정 교육, 계획서부터 서명까지", lead: "직원 명부와 연간계획서만 넣으면 교육 일정 · 출석 · 서명 · 미이수 보충 · 위험성평가 · 소방 기록까지 이어집니다.",
+    before: "교육 일정 · 대상자 · 서류를 사람이 챙김", after: "대상자 자동 지정 · 기한 알림 · 교육자료 · 태블릿 서명", check: "가상 자료로 검증: 기한 초과 0건 · 올해 이수율 100%", file: "영상/07_안전보건교육.mp4", yt: "https://youtu.be/xHWtPTgp39w" }
+];
+var WEB = /^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function ytId(u) { var m = /(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{6,})/.exec(u || ""); return m ? m[1] : ""; }
+document.getElementById("demos").innerHTML = DEMOS.map(function (d, i) {
+  var id = ytId(d.yt);
+  // 인터넷 주소(https)로 열면 유튜브를 화면 안에서 재생, 파일로 열면 영상 파일(없으면 유튜브 미리보기)
+  var media = WEB && id ? '<iframe data-yt="' + id + '" title="' + esc(d.title) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+                        : '<video src="' + esc(d.file) + '" muted playsinline loop controls preload="metadata" data-yt="' + id + '"></video>';
+  return '<section class="demo' + (i % 2 ? " soft" : "") + '" id="d' + d.n + '"><div class="wrap"><div class="head"><div class="num rv">' + d.n + '</div><div><span class="dept rv">' + esc(d.dept) + '</span><h2 class="rv d1">' + esc(d.title) + '</h2><p class="lead rv d2">' + esc(d.lead) + "</p>" +
+    '<div class="ba rv d2"><div class="b"><small>지금</small>' + esc(d.before) + '</div><div class="a"><small>바뀌면</small>' + esc(d.after) + "</div></div></div></div>" +
+    '<div class="screen rv">' + media + '</div><p class="check rv">' + esc(d.check) + (id ? ' <a class="ytlink" href="https://youtu.be/' + id + '" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>' : "") + "</p></div></section>";
+}).join("");
+
+// 영상 파일이 없으면 (메일로 받아 연 경우) 유튜브 미리보기 그림으로 바꾼다
+function toThumb(v) {
+  var id = v.dataset.yt; if (!id) return;
+  var a = document.createElement("a"); a.className = "thumb"; a.href = "https://youtu.be/" + id; a.target = "_blank"; a.rel = "noopener";
+  a.innerHTML = '<img alt="영상 미리보기"><span class="play">▶</span><span class="cap">눌러서 영상 보기</span>';
+  var im = a.querySelector("img"); im.onerror = function () { im.onerror = null; im.src = "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"; };
+  im.src = "https://i.ytimg.com/vi/" + id + "/maxresdefault.jpg";
+  v.replaceWith(a);
+}
+document.querySelectorAll(".screen video").forEach(function (v) {
+  v.addEventListener("error", function () { toThumb(v); });
+  if (location.protocol !== "file:" && location.protocol !== "http:" && location.protocol !== "https:") toThumb(v);
+});
+// 스크롤하면 나타나기 · 화면에 들어온 영상만 재생
+var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add("in"); }); }, { threshold: 0.15 });
+document.querySelectorAll(".rv").forEach(function (el) { io.observe(el); });
+var vo = new IntersectionObserver(function (es) {
+  es.forEach(function (e) {
+    var v = e.target.querySelector("video"), f = e.target.querySelector("iframe[data-yt]");
+    if (v) { if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } else v.pause(); }
+    if (f && e.isIntersecting && !f.src) f.src = "https://www.youtube.com/embed/" + f.dataset.yt + "?autoplay=1&mute=1&loop=1&playlist=" + f.dataset.yt + "&rel=0&playsinline=1";
+  });
+}, { threshold: 0.45 });
+document.querySelectorAll(".screen").forEach(function (el) { vo.observe(el); });
+
+// 오른쪽 진행 점
+var marks = [["top", "처음"], ["why", "왜 필요한가"]].concat(DEMOS.map(function (d) { return ["d" + d.n, d.n + ". " + d.title]; })).concat([["portal", "하나의 시스템"], ["ready", "지금 된 것"], ["start", "이제부터가 시작"], ["final", "마지막"]]);
+document.getElementById("dots").innerHTML = marks.map(function (m) { return '<a href="#' + m[0] + '" data-id="' + m[0] + '" aria-label="' + esc(m[1]) + '"><span>' + esc(m[1]) + "</span></a>"; }).join("");
+var so = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) document.querySelectorAll(".dots a").forEach(function (a) { a.classList.toggle("on", a.dataset.id === e.target.id); }); }); }, { threshold: 0.5 });
+marks.forEach(function (m) { var el = document.getElementById(m[0]); if (el) so.observe(el); });
+</script>
+</body>
+</html>
