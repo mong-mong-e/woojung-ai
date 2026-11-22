@@ -215,11 +215,14 @@ var DEMOS = [
     before: "교육 일정 · 대상자 · 서류를 사람이 챙김", after: "대상자 자동 지정 · 기한 알림 · 교육자료 · 태블릿 서명", check: "가상 자료로 검증: 기한 초과 0건 · 올해 이수율 100%", file: "영상/07_안전보건교육.mp4", yt: "https://youtu.be/xHWtPTgp39w" }
 ];
 var WEB = /^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+// 카톡 · 네이버 · 인스타 같은 앱 안 브라우저는 유튜브를 화면 안에 넣으면 막히는 경우가 많다(오류 153, 2026-11-22 카톡에서 확인)
+// → 미리보기 그림 + ▶ (누르면 유튜브 앱에서 재생)
+var INAPP = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp/i.test(navigator.userAgent);
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function ytId(u) { var m = /(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{6,})/.exec(u || ""); return m ? m[1] : ""; }
 // 인터넷 주소(https)로 열면 유튜브를 화면 안에서 재생, 파일로 열면 영상 파일(없으면 유튜브 미리보기)
 function mediaHtml(d, id) {
-  return WEB && id ? '<iframe data-yt="' + id + '" title="' + esc(d.title) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+  return WEB && id && !INAPP ? '<iframe data-yt="' + id + '" title="' + esc(d.title) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
                    : '<video src="' + esc(d.file) + '" muted playsinline loop controls preload="metadata" data-yt="' + id + '"></video>';
 }
 function ytLink(id) { return id ? ' <a class="ytlink" href="https://youtu.be/' + id + '" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>' : ""; }
@@ -248,7 +251,7 @@ function toThumb(v) {
 }
 document.querySelectorAll(".screen video").forEach(function (v) {
   v.addEventListener("error", function () { toThumb(v); });
-  if (location.protocol !== "file:" && location.protocol !== "http:" && location.protocol !== "https:") toThumb(v);
+  if (INAPP || (location.protocol !== "file:" && location.protocol !== "http:" && location.protocol !== "https:")) toThumb(v);
 });
 // 스크롤하면 나타나기 · 화면에 들어온 영상만 재생
 var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add("in"); }); }, { threshold: 0.15 });
