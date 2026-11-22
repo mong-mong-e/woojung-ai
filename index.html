@@ -215,29 +215,31 @@ var DEMOS = [
     before: "교육 일정 · 대상자 · 서류를 사람이 챙김", after: "대상자 자동 지정 · 기한 알림 · 교육자료 · 태블릿 서명", check: "가상 자료로 검증: 기한 초과 0건 · 올해 이수율 100%", file: "영상/07_안전보건교육.mp4", yt: "https://youtu.be/xHWtPTgp39w" }
 ];
 var WEB = /^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-// 카톡 · 네이버 · 인스타 같은 앱 안 브라우저는 유튜브를 화면 안에 넣으면 막히는 경우가 많다(오류 153, 2026-11-22 카톡에서 확인)
-// → 미리보기 그림 + ▶ (누르면 유튜브 앱에서 재생)
-var INAPP = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp/i.test(navigator.userAgent);
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function ytId(u) { var m = /(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{6,})/.exec(u || ""); return m ? m[1] : ""; }
-// 인터넷 주소(https)로 열면 유튜브를 화면 안에서 재생, 파일로 열면 영상 파일(없으면 유튜브 미리보기)
-function mediaHtml(d, id) {
-  return WEB && id && !INAPP ? '<iframe data-yt="' + id + '" title="' + esc(d.title) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'
-                   : '<video src="' + esc(d.file) + '" muted playsinline loop controls preload="metadata" data-yt="' + id + '"></video>';
+// 영상 (2026-11-22): 인터넷 주소에서는 페이지에 올린 가벼운 영상(v\)을 직접 재생 — 휴대폰 · 카톡에서도 화면에 보이면 자동 재생
+//   (유튜브를 화면 안에 넣으면 카톡 등 앱 안 브라우저에서 오류 153). 2차 영상은 비밀 링크의 열쇠로 풀어 재생(enc).
+//   파일로 열면 영상 폴더의 파일, 없으면(메일) 유튜브 미리보기 그림.
+function mediaHtml(d, id, enc) {
+  var a = ' muted playsinline loop controls data-yt="' + id + '"';
+  if (!WEB) return '<video src="' + esc(d.file) + '" preload="metadata"' + a + "></video>";
+  if (enc) return '<video data-enc="' + esc(enc) + '" preload="none"' + a + "></video>";
+  if (d.web === false) return '<video data-thumb="1"' + a + "></video>";
+  return '<video src="v/' + esc(d.file.split("/").pop()) + '" preload="metadata"' + a + "></video>";
 }
 function ytLink(id) { return id ? ' <a class="ytlink" href="https://youtu.be/' + id + '" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>' : ""; }
 document.getElementById("demos").innerHTML = DEMOS.map(function (d, i) {
   var id = ytId(d.yt), media = mediaHtml(d, id);
   return '<section class="demo' + (i % 2 ? " soft" : "") + '" id="d' + d.n + '"><div class="wrap"><div class="head"><div class="num rv">' + d.n + '</div><div><span class="dept rv">' + esc(d.dept) + '</span><h2 class="rv d1">' + esc(d.title) + '</h2><p class="lead rv d2">' + esc(d.lead) + "</p>" +
     '<div class="ba rv d2"><div class="b"><small>지금</small>' + esc(d.before) + '</div><div class="a"><small>바뀌면</small>' + esc(d.after) + "</div></div></div></div>" +
-    '<div class="screen rv">' + media + '</div><p class="check rv">' + esc(d.check) + (id ? ' <a class="ytlink" href="https://youtu.be/' + id + '" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>' : "") + "</p></div></section>";
+    '<div class="screen rv">' + media + '</div><p class="check rv">' + esc(d.check) + ytLink(id) + "</p></div></section>";
 }).join("");
 // 추가 구간 (별도 파일이 있을 때만)
 if (window.DAY2) {
   var D2 = window.DAY2, id2 = ytId(D2.yt);
   document.getElementById("day2box").innerHTML = '<section id="' + D2.id + '"><div class="wrap"><p class="eyebrow rv">' + esc(D2.eyebrow) + '</p><h2 class="rv d1">' + D2.title + '</h2><p class="lead rv d2">' + esc(D2.lead) + "</p>" +
     '<div class="times">' + D2.times.map(function (x, k) { return '<div class="tile rv d' + Math.min(k, 3) + '"><div class="n">' + esc(x[0]) + "</div><b>" + esc(x[1]) + "</b><p>" + esc(x[2]) + "</p></div>"; }).join("") + "</div>" +
-    '<div class="screen rv">' + mediaHtml({ title: D2.mark, file: D2.file }, id2) + '</div><p class="check rv">' + esc(D2.check) + ytLink(id2) + "</p></div></section>";
+    '<div class="screen rv">' + mediaHtml({ title: D2.mark, file: D2.file, web: false }, id2, window.SECRET_VIDEO) + '</div><p class="check rv">' + esc(D2.check) + ytLink(id2) + "</p></div></section>";
 }
 
 // 영상 파일이 없으면 (메일로 받아 연 경우) 유튜브 미리보기 그림으로 바꾼다
@@ -249,9 +251,21 @@ function toThumb(v) {
   im.src = "https://i.ytimg.com/vi/" + id + "/maxresdefault.jpg";
   v.replaceWith(a);
 }
+// 암호화된 영상: 비밀 링크의 열쇠(이 창에만 기억)로 풀어서 재생
+function decVideo(v) {
+  var un = function (s) { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+  var key = ""; try { key = sessionStorage.getItem("woojung_k") || ""; } catch (e) { }
+  if (!key || !window.crypto || !crypto.subtle) { toThumb(v); return; }
+  Promise.all([fetch(v.dataset.enc).then(function (r) { if (!r.ok) throw 0; return r.arrayBuffer(); }), crypto.subtle.importKey("raw", un(key), "AES-GCM", false, ["decrypt"])])
+    .then(function (x) { var b = new Uint8Array(x[0]); return crypto.subtle.decrypt({ name: "AES-GCM", iv: b.slice(0, 12) }, x[1], b.slice(12)); })
+    .then(function (pt) { v.src = URL.createObjectURL(new Blob([pt], { type: "video/mp4" })); v.dataset.ready = "1"; if (v.dataset.want) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } })
+    .catch(function () { toThumb(v); });
+}
 document.querySelectorAll(".screen video").forEach(function (v) {
+  if (v.dataset.thumb) { toThumb(v); return; }
+  if (v.dataset.enc) { decVideo(v); return; }
   v.addEventListener("error", function () { toThumb(v); });
-  if (INAPP || (location.protocol !== "file:" && location.protocol !== "http:" && location.protocol !== "https:")) toThumb(v);
+  if (location.protocol !== "file:" && location.protocol !== "http:" && location.protocol !== "https:") toThumb(v);
 });
 // 스크롤하면 나타나기 · 화면에 들어온 영상만 재생
 var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add("in"); }); }, { threshold: 0.15 });
@@ -259,7 +273,7 @@ document.querySelectorAll(".rv").forEach(function (el) { io.observe(el); });
 var vo = new IntersectionObserver(function (es) {
   es.forEach(function (e) {
     var v = e.target.querySelector("video"), f = e.target.querySelector("iframe[data-yt]");
-    if (v) { if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } else v.pause(); }
+    if (v) { if (e.isIntersecting) { v.dataset.want = "1"; if (!v.dataset.enc || v.dataset.ready) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } } else { v.dataset.want = ""; v.pause(); } }
     if (f && e.isIntersecting && !f.src) f.src = "https://www.youtube.com/embed/" + f.dataset.yt + "?autoplay=1&mute=1&loop=1&playlist=" + f.dataset.yt + "&rel=0&playsinline=1";
   });
 }, { threshold: 0.45 });
